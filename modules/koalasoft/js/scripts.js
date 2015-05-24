@@ -6,9 +6,6 @@
 
 (function ($) {
 
-    
-    
-
     $(document).ready(function(){ 
     	
     	$( "input[id*='pagarLecturas']" ).click(function() {
@@ -20,12 +17,6 @@
             $("#mes").val(values[0]);
             
         });
-    	/*
-    	$("[id*=" + /\b[.?]/gi +toggleGroup+"]").click(function() {
-             $("#mando").val("pagarLecturas");
-             alert("holaaaa");
-             
-        });*/
     	
         $("#block-koalasoft-payments #edit-ci").keypress(function() {
             $("#block-koalasoft-payments #edit-medidorf").val('');
@@ -52,24 +43,38 @@
             });
         });
         
+        //To calculate change of price
         $("#edit-field-lectura-actual-und-0-value").change(function() {
-            //Allow only backspace, delete and enter
             var currentLecture = parseInt(this.value);
             var oldLecture = parseInt($("#edit-field-lectura-anterior-und-0-value").val());
             var consumption = currentLecture - oldLecture;
-            var limit = parseInt(rates['limite']);
-            var baseAmount = parseFloat(rates['montoBase']);
-            var extraUnit = parseInt(rates['unidadExtra']);
-            var extraAmount = parseFloat(rates['montoExtra']);
             var amount = 0;
+            var currentPrice = 0; var currentUnit = 0; var firstLimit = 0;
             
-            if (consumption <= limit){
-            	amount =  baseAmount;
-            }else {
-            	amount = baseAmount + (consumption-limit)/extraUnit*extraAmount;
+            for(var i=0; i<rates.length; i++) {
+            	var limit = parseInt(rates[i]['limite']);
+            	var baseAmount = parseFloat(rates[i]['montoBase']);
+                var extraUnit = parseInt(rates[i]['unidadExtra']);
+                var extraAmount = parseFloat(rates[i]['montoExtra']);
+                
+                if ( i == 0 ) {
+                	firstLimit = limit;
+                }
+                if (consumption <= limit && i == 0) {
+                    amount = baseAmount;
+                    break;
+                } else if(consumption > limit){
+                    currentPrice = extraAmount;
+                    currentUnit = extraUnit;
+                }
+            }
+            
+            if (amount == 0){
+            	amount = baseAmount + (consumption-firstLimit)/currentUnit*currentPrice;            	
             }
             
             $("#edit-field-monto-und-0-value").val(amount);
+            $("#edit-field-monto-excedente-und-0-value").val(amount-baseAmount);
             
         });
         

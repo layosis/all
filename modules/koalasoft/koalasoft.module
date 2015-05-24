@@ -69,14 +69,15 @@ function koalasoft_form_alter(&$form, &$form_state, $form_id ){
     AND n.nid = mb.entity_id
     AND n.nid = uex.entity_id
     AND n.nid = mex.entity_id
-    LIMIT 1";
+	ORDER BY limite ASC";
     $res = db_query($sql, array());
-    $rates = $res->fetchAssoc();
-    $rates = json_encode($rates);
-    
-    print("<script>var rates = $rates </script>");
-     $form['#validate'][] = 'lectura_validate';
-     
+    $i = 0;
+    print("<script>var rates = [];</script>");
+    while ($row = $res->fetchAssoc()) {
+      print("<script>rates[" . $i . "] = " . json_encode($row) . ";</script>");
+      $i++;
+    }
+    $form['#validate'][] = 'lectura_validate';
   }
   
   //MODIFICACION DE LA FECHA DE BUSQUEDA DE LAS BOLETAS DE PAGO
