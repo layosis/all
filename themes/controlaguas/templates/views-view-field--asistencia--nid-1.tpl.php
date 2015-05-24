@@ -44,7 +44,6 @@
     and me.field_medidor_target_id = ".$medidor." and  fe.field_fecha_value like '".$hoy."%' 
     and mo.field_motivo_value like 'Falta a asamblea en fecha:%'";
 
-
     $clase="";
     $idpago = db_query($sql)->fetchField();
 
@@ -52,7 +51,8 @@
     if(isset($_POST['fecha'])){  //  si se presiona el boton guardar
         if(isset($_POST['controlfalta'][$i]) && $_POST['controlfalta'][$i] == $output) {  // si es cheket
             $act = ' checked';
-            $disabled = ' disabled';
+            $disabled = '';
+        } else {
             if($idpago > 0){}  // si tiene registro de falta o retraso
             else{
                 $node = new stdClass();
@@ -70,13 +70,15 @@
                 $node = node_submit($node);
                 node_save($node);                                
             }
-        } 
+
+        }
+
     } else {  // si se cargo por primera vez la pagina
-        if($idpago > 0){  // si tiene registro de falta o retraso
-            $act = " checked";
+        if($idpago > 0){  // si tiene registro de falta
+            $act = "";
             $disabled = ' disabled';
         } else {
-             $act = "";
+            $act = " checked";
             $disabled = '';
         }
     } 

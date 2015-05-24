@@ -787,20 +787,28 @@ function getPageComprobante($idcomp=0){
     $idlectura = 0;
   $lectura = node_load($idlectura);
 
+
   $nombreCliente = "<div class='nombre'>Apellidos y Nombres de Socios : <span>" . $nombres . "</span></div>";
   $medidor = "<div class='medidor'>Codigo : <span>". $medidor ."</span></div>";
   $mes = "<div class='mes'>Correspondiente al mes de : <span>". getLiteralMonth($m) ."</span></div>";
   $fecha = "<div class='fecha'>dia - mes - Año<br>".date("d - m - Y")."</div>";
   $comprovante = "<div class='numero'>Nro. ". $lectura->field_comprobante_lectura['und'][0]['value'] ."</div>";
   $monto_lectura = $lectura->field_monto['und'][0]['value'];
+  $monto_lectura_excedente = $lectura->field_monto_excedente['und'][0]['value'];
 
   $total += $monto_lectura;
 
   $tabla = "<div id='tablacomprobante'>
       <table>
         <tr>
-          <td class='datos'>Tarifa por consumo de agua.</td><td class='monto'>". $monto_lectura ." Bs.</td>
-        </tr>";
+          <td class='datos'>Tarifa basica por consumo de agua.</td><td class='monto'>". ($monto_lectura - $monto_lectura_excedente) ." Bs.</td>
+        </tr>
+        <tr>
+          <td class='datos'>Excedente por consumo de agua.</td><td class='monto'>". $monto_lectura_excedente ." Bs.</td>
+        </tr>
+
+
+        ";
   $tabla .= $trs;
         //~ <tr>
           //~ <td class='datos'>Recargo por incumplimiento.</td><td class='monto'>0</td>
@@ -940,6 +948,10 @@ function getLectura($idmedidor, $anio){
     $ids[] = $row->entity_id;
   }
   return $ids;
+}
+
+function separarTarifa(){
+
 }
 
 /*********************************************
