@@ -4,6 +4,7 @@
  * EntitiesData class.
   */
 
+
 class EntitiesData {
   
   /**

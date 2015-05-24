@@ -1,4 +1,4 @@
-Drupal 7 entities_data
+Drupal 7 entities_data.
 =================
 
 The purpose of this project is to provide to  drupal programmers an easy way to access an save datas located in drupal entities.
