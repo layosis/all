@@ -1,0 +1,13 @@
+/* ===========================================================
+ *    Stilos para laboleta de pago
+ * =========================================================== */
+
+.view-aviso-pago .views-field {
+    clear:both;
+}
+.view-aviso-pago .views-field .views-label {
+    float: left;
+    padding-right: 10px;
+    font-weight: bold;
+}
+

@@ -1,0 +1,32 @@
+
+#table_length label,
+#table_filter label {
+    display: block;
+    font-weight: normal;
+}
+
+table.dataTable.no-footer {
+    border-bottom: 0px !important;
+}
+
+table.dataTable {
+    border-collapse: collapse !important;
+}
+
+table.dataTable thead th, table.dataTable thead td {
+    padding: 4px 6px;
+    border-bottom: 0px none;
+}
+
+table.dataTable thead .sorting {
+    background-color: #2A6E9E;
+}
+
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc {
+    background-color: #083F63;
+}
+
+table.dataTable tbody th, table.dataTable tbody td {
+    padding: 4px 6px;
+}

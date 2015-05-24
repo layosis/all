@@ -1,0 +1,433 @@
+/*
+ * @file
+ * Print Styles
+ * This probably needs work, but it's a good starting point.
+ */
+/*
+ * Body
+ */
+body {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.4;
+  word-spacing: 1.1pt;
+  letter-spacing: 0.2pt;
+  font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+  color: black;
+  font-size: 11pt;
+}
+
+/*
+ * Links
+ */
+a {
+  background: transparent;
+  font-weight: 700;
+  text-decoration: underline;
+  color: #000000;
+}
+a[href^="http://"]:after, a[href^="http://"]:visited:after {
+  content: "(" attr(href) ")";
+  font-size: 10pt;
+}
+
+/*
+ * Strip background from likely candidates
+ */
+div[id*="wrapper"],
+[class*="title"],
+[class*="inner"],
+header,
+footer,
+#branding,
+#container,
+#columns,
+.columns-inner,
+#content-column,
+.content-inner,
+.region,
+.region-header,
+.region-content,
+.article,
+.article-title,
+.article-content,
+.comment,
+.comment-title,
+.comment-content,
+.block,
+.block-inner,
+.block-title,
+.block-content,
+table,
+table * {
+  background: none !important;
+}
+
+
+/*
+ * Hide various bits of the page, .noprint reusable class for hiding stuff.
+ */
+.noprint,
+.sidebar,
+#breadcrumb,
+.nav,
+.field-type-taxonomy-term-reference,
+ul.links,
+.feed-icon,
+.poll .bar,
+.poll .foreground,
+.comment-form,
+#comment-form,
+.book-navigation,
+.tabs,
+.action-links,
+.pager,
+.messages,
+.help {
+  display: none;
+}
+
+/*
+ * Ensure the display the main content region
+ */
+#content {
+  display: block !important;
+}
+
+/*
+ * HTML elements
+ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #333333;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+h1 {
+  font-size: 14pt;
+}
+
+h2 {
+  font-size: 13pt;
+}
+
+h3 {
+  font-size: 12pt;
+}
+
+h4,
+h5,
+h6 {
+  font-size: 11pt;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a,
+#site-name a,
+#site-slogan {
+  text-decoration: none !important;
+  color: #333333;
+}
+
+.h-group a:link, .h-group a:visited {
+  text-decoration: none;
+}
+
+#page-title {
+  margin-top: 20px;
+}
+
+pre,
+code,
+tt,
+samp,
+kbd,
+var {
+  font-size: 10pt;
+  font-family: Consolas, "Lucida Console", Menlo, Monaco, "DejaVu Sans Mono", monospace, sans-serif;
+}
+
+blockquote {
+  margin: 20px;
+  padding: 10px;
+  font-size: 10pt;
+  font-style: italic;
+  background: #eeeeee;
+}
+
+hr {
+  background-color: #666666;
+}
+
+/*
+ * Header, Logo, Site name
+ */
+#header {
+  padding-bottom: 20px;
+}
+
+#logo img {
+  padding: 0 10px 0 0;
+  margin: 0 !important;
+  float: none !important;
+}
+
+/*
+ * Images
+ */
+img {
+  float: left;
+  margin: 4px 20px 10px 0;
+  page-break-inside: avoid;
+}
+
+a img {
+  border: none;
+  display: none !important;
+}
+
+/*
+ * Tables
+ */
+table {
+  margin: 1px;
+  text-align: left;
+  width: calc(100% - 2px);
+  width: -webkit-calc(100% - 2px);
+  width: -moz-calc(100% - 2px);
+  width: -o-calc(100% - 2px);
+}
+
+th {
+  border-bottom: 1px solid #333333;
+  font-weight: 700;
+  background: red;
+}
+
+td {
+  border-bottom: 1px solid #333333;
+}
+
+th,
+td {
+  padding: 4px 10px 4px 0;
+}
+
+tfoot {
+  font-style: italic;
+}
+
+caption {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+/*
+ * Forms
+ */
+form {
+  margin-bottom: 10px;
+}
+
+/*
+ * Poll module
+ */
+.poll .text,
+.poll .percent,
+.poll .total {
+  text-align: left;
+}
+.poll form {
+  margin-bottom: 0;
+}
+
+/*
+ * Articles
+ */
+.node,
+.comment {
+  margin-bottom: 20px;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+
+.submitted {
+  color: #666666;
+  text-decoration: none;
+  font-size: 9pt;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+.submitted a {
+  color: #666666;
+  text-decoration: none;
+  font-size: 9pt;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+
+td{
+    border:1px solid #000 !important;
+}
+
+/* =============================================================================
+ *   FORMULARIOS
+ * ========================================================================== */
+
+input{
+  border: none !important;
+  background: #f0f0f0 !important;
+}
+fieldset{
+  border:none;
+  padding: 0;
+}
+
+thead tr{
+  background: #B4D7E7 !important;
+}
+
+/* =============================================================================
+ *   BLOQUES
+ * ========================================================================== */
+
+
+#block-menu-menu-menu-administracion,
+#menu-bar,
+.region-user-name,
+.title_comprobante,
+#footer, #edit-actions,
+.tabledrag-toggle-weight-wrapper,
+table td.views-field-field-direccion,
+table th.views-field-field-direccion,
+table td.views-field-edit-node,
+table th.views-field-edit-node,
+table td.views-field-delete-node,
+table th.views-field-delete-node{
+  display: none !important;
+}
+
+#logo img{
+  width: 150px;
+}
+#fecha{
+  float:right;
+}
+
+#main-content{
+  margin-top: -30px !important;
+}
+
+/* =============================================================================
+ *   COMPROBANTE DE PAGO
+ * ========================================================================== */
+
+
+#logotxt{
+  width: 240px;
+  text-align: center;
+}
+#logotxt .nombrelogo {
+  font-weight: bold;
+  font-size: 20px;
+  margin: -5px 0px;
+}
+#logotxt .direcclogo {
+  font-size: 11px;
+}
+
+.title_comprobante h1 {
+  margin: 0px;
+  text-align: center;
+  margin-top: -52px;
+  margin-bottom: 36px;
+}
+#comprobante{
+  margin-top: 20px;  
+}
+
+
+#comprobante .firmas1, #comprobante .firmas2{
+  width: 50%;
+  float: left;
+  text-align: center;
+}
+
+#comprobante .nombre {
+  margin-top: 30px;
+}
+
+#comprobante .mes {
+  margin-bottom: 30px;
+}
+
+#comprobante .fecha {
+  width: 150px;
+  text-align: center;
+  font-weight: bold;
+  float: right;
+  margin-top: -50px;
+  margin-right: 28px;
+}
+#comprobante .numero {
+  font-size: 15pt;
+  float: right;
+  color: red;
+  width: 120px;
+  margin-right: 24px;
+  text-align: center;
+}
+#comprobante span {
+  font-weight: bold;
+}
+#comprobante #tablacomprobante{
+  margin-bottom: 80px;
+  width: calc(100% - 2px);
+  width: -webkit-calc(100% - 2px);
+  width: -moz-calc(100% - 2px);
+  width: -o-calc(100% - 2px);
+}
+
+#comprobante #tablacomprobante td{
+  padding-left:15px ;
+}
+
+#comprobante #tablacomprobante tr.total{
+  border-top: 3px solid #2f6ca8;
+}
+
+#comprobante #tablacomprobante tr.total td{
+  font-weight: bold;
+  color: #2F6CB8;;
+}
+#comprobante #tablacomprobante tr.total td.datos{
+  text-align: right;
+  padding-right: 20px;
+}
+
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+

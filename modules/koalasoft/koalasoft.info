@@ -1,0 +1,9 @@
+;$id$
+name = koalasoft
+description = functions that alter the functioning of Drupal.
+core = 7.x
+package = koalasoft
+files[] = koalasoft.module
+
+;dependencies[] = autoload
+;php = 5.2
