@@ -17,7 +17,7 @@ body {
   color: black;
   font-size: 11pt;
 }
-
+.print-link{display: none;}
 /*
  * Links
  */
@@ -375,7 +375,7 @@ table th.views-field-delete-node{
 }
 
 #comprobante .nombre {
-  margin-top: 30px;
+  margin-top: 55px;
 }
 
 #comprobante .mes {

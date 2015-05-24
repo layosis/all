@@ -689,6 +689,7 @@ function koalasoft_node_view($node, $view_mode, $langcode) {
    ***********************************/
   
   if($url == $pagepago){
+      drupal_add_css(drupal_get_path('module', 'koalasoft') . '/css/comp_pago.css');
       $node->content['my_table_'.$i] = array(
         '#markup' => getPageComprobante(),
       );    
@@ -699,7 +700,7 @@ function koalasoft_node_view($node, $view_mode, $langcode) {
 function getPageComprobante($idcomp=0){
 //  $logo="<img src='logo.png'>";
   $nombreEmp = "<div id='logotxt'>
-    <div class='titulologo'>Asociacionde Agua Potable</div>
+    <div class='titulologo'>Asociacion de Agua Potable</div>
     <div class='nombrelogo'>San Severino</div>
     <div class='direcclogo'>Barrio Nuevo - Punata</div>
   </div>";
@@ -726,7 +727,7 @@ function getPageComprobante($idcomp=0){
   $res = db_query($sqlNombres, array(':medidor' => $medidor));
   $nombres = "";
   foreach($res as $row){
-    $nombres = $row->nombres . " " . $row->appaterno . " " . $row->apmaterno;
+    $nombres = $row->appaterno . " " . $row->apmaterno . " " . $row->nombres;
   }
 
   $sqlLectura = "SELECT m.entity_id entity
@@ -786,7 +787,7 @@ function getPageComprobante($idcomp=0){
   $lectura = node_load($idlectura);
 
   $nombreCliente = "<div class='nombre'>Apellidos y Nombres de Socios : <span>" . $nombres . "</span></div>";
-  $medidor = "<div class='medidor'>Medidor : <span>". $medidor ."</span></div>";
+  $medidor = "<div class='medidor'>Codigo : <span>". $medidor ."</span></div>";
   $mes = "<div class='mes'>Correspondiente al mes de : <span>". getLiteralMonth($m) ."</span></div>";
   $fecha = "<div class='fecha'>dia - mes - Año<br>".date("d - m - Y")."</div>";
   $comprovante = "<div class='numero'>Nro. ". $lectura->field_comprobante_lectura['und'][0]['value'] ."</div>";
