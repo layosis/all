@@ -1,0 +1,5 @@
+name = Entities data
+description = This module provides methods for easily obtaining and save in entities
+package = Development
+files[] = EntitiesData.inc
+core = 7.x

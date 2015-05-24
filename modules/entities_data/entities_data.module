@@ -1,0 +1,24 @@
+<?php
+/**
+ * @file
+* A module for functions that alter the functioning of Drupal
+*/
+
+
+/**
+* Implements hook_help().
+*
+* Displays help and module information.
+*
+* @param path
+*   Which path of the site we're using to display help
+* @param arg
+*   Array that holds the current path as returned from arg() function
+*/
+function entities_data_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#entities_data":
+      return '<p>' . t("This module provides methods for easily get and set datas in entities") . '</p>';
+      break;
+  }
+}
