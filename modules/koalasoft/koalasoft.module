@@ -26,6 +26,8 @@ function koalasoft_form_alter(&$form, &$form_state, $form_id ){
   $path = drupal_get_path('module', 'koalasoft');
   drupal_add_js($path.'/js/scripts.js');
   //LECTURES 
+  
+  //vacho
 
   if($form_id == "lectura_node_form"){
     $numcomp = db_query("SELECT max(field_comprobante_lectura_value) FROM field_data_field_comprobante_lectura")->fetchField();
