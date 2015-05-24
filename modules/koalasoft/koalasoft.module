@@ -700,6 +700,7 @@ function koalasoft_node_view($node, $view_mode, $langcode) {
 
 function getPageComprobante($idcomp=0){
 //  $logo="<img src='logo.png'>";
+
   $nombreEmp = "<div id='logotxt'>
     <div class='titulologo'>Asociacion de Agua Potable</div>
     <div class='nombrelogo'>San Severino</div>
@@ -818,14 +819,21 @@ function getPageComprobante($idcomp=0){
           //~ <td class='datos'>Otros.</td><td class='monto'>". $otros ."</td>
         //~ </tr>
   $tabla .= "<tr class='total'>
-          <td class='datos'>TOTAL :</td><td class='monto'>" . $total . " Bs.</td>
-        </tr>
-      </table>
-  </div>";
+          <td class='datos'>TOTAL :</td><td class='monto'>" . $total . " Bs.</td></tr>
+          </table></div>";
+
+  $literal = "<div class='literal'><span class = 'texto'>Son: </span><span class ='valor'>".EnLetras::ValorEnLetras($total,'Boliviano').". </span></div>";
+
   $firmas[] = "<div class='firmas1'>Firma Socio</div>";
   $firmas[] = "<div class='firmas2'>Secretaria</div>";
   
-  $valor = "<div  id='comprobante'>".$logo.$nombreEmp.$fecha.$comprovante.$titulo.$nombreCliente.$medidor.$mes.$tabla.$firmas[0].$firmas[1]."</div>";
+  $valor = "<div  id='comprobante'>".
+        $logo.
+        $nombreEmp.$fecha.$comprovante.
+        $titulo.$nombreCliente.$medidor.$mes.$tabla.$literal.
+        $firmas[0].$firmas[1].
+        "</div>";
+
   return $valor;
 }
 

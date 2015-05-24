@@ -316,7 +316,6 @@ thead tr{
 #block-menu-menu-menu-administracion,
 #menu-bar,
 .region-user-name,
-.title_comprobante,
 #footer, #edit-actions,
 .tabledrag-toggle-weight-wrapper,
 table td.views-field-field-direccion,
@@ -339,95 +338,7 @@ table th.views-field-delete-node{
   margin-top: -30px !important;
 }
 
-/* =============================================================================
- *   COMPROBANTE DE PAGO
- * ========================================================================== */
 
-
-#logotxt{
-  width: 240px;
-  text-align: center;
-}
-#logotxt .nombrelogo {
-  font-weight: bold;
-  font-size: 20px;
-  margin: -5px 0px;
-}
-#logotxt .direcclogo {
-  font-size: 11px;
-}
-
-.title_comprobante h1 {
-  margin: 0px;
-  text-align: center;
-  margin-top: -52px;
-  margin-bottom: 36px;
-}
-#comprobante{
-  margin-top: 20px;  
-}
-
-
-#comprobante .firmas1, #comprobante .firmas2{
-  width: 50%;
-  float: left;
-  text-align: center;
-}
-
-#comprobante .nombre {
-  margin-top: 55px;
-}
-
-#comprobante .mes {
-  margin-bottom: 30px;
-}
-
-#comprobante .fecha {
-  width: 150px;
-  text-align: center;
-  font-weight: bold;
-  float: right;
-  margin-top: -50px;
-  margin-right: 28px;
-}
-#comprobante .numero {
-  font-size: 15pt;
-  float: right;
-  color: red;
-  width: 120px;
-  margin-right: 24px;
-  text-align: center;
-}
-#comprobante span {
-  font-weight: bold;
-}
-#comprobante #tablacomprobante{
-  margin-bottom: 80px;
-  width: calc(100% - 2px);
-  width: -webkit-calc(100% - 2px);
-  width: -moz-calc(100% - 2px);
-  width: -o-calc(100% - 2px);
-}
-
-#comprobante #tablacomprobante td{
-  padding-left:15px ;
-}
-
-#comprobante #tablacomprobante tr.total{
-  border-top: 3px solid #2f6ca8;
-}
-
-#comprobante #tablacomprobante tr.total td{
-  font-weight: bold;
-  color: #2F6CB8;;
-}
-#comprobante #tablacomprobante tr.total td.datos{
-  text-align: right;
-  padding-right: 20px;
-}
-
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
 

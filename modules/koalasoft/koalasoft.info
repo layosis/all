@@ -4,6 +4,7 @@ description = functions that alter the functioning of Drupal.
 core = 7.x
 package = koalasoft
 files[] = koalasoft.module
+files[] = EnLetras.inc
 
 ;dependencies[] = autoload
 ;php = 5.2

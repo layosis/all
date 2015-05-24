@@ -15,6 +15,7 @@
 * @param arg
 *   Array that holds the current path as returned from arg() function
 */
+
 function entities_data_help($path, $arg) {
   switch ($path) {
     case "admin/help#entities_data":
