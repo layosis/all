@@ -23,15 +23,16 @@
  */
 ?>
 <?php 
-    $result = db_query("select field_nombres_value nom, field_apellido_paterno_value app, field_apellido_materno_value apm
-    from field_data_field_nombres nom, field_data_field_apellido_paterno app, field_data_field_apellido_materno apm
-    where nom.entity_id=app.entity_id and nom.entity_id=apm.entity_id and nom.entity_id = (
-    SELECT `entity_id` FROM `field_data_field_medidor` WHERE bundle = 'persona' and `field_medidor_target_id` = (
-    SELECT `field_medidor_target_id` FROM `field_data_field_medidor` WHERE `entity_id` = :id ))", array(':id' => $output));
 
-    foreach ($result as $record) {
-        $nombres = $record->nom." ".$record->app." ".$record->apm;
-    }
+    $idpersona = db_query("select entity_id
+    from field_data_field_nombres nom
+    where nom.entity_id = (
+    SELECT `entity_id` FROM `field_data_field_medidor` WHERE bundle = 'persona' and `field_medidor_target_id` = (
+    SELECT `field_medidor_target_id` FROM `field_data_field_medidor` WHERE `entity_id` = :id))", array(':id' => $output))->fetchField();
+
+    $persona = node_load($idpersona);
+    $nombres = $persona->field_nombres['und'][0]['value']." ".$persona->field_apellido_paterno['und'][0]['value']." ".$persona->field_apellido_materno['und'][0]['value'];
     print $nombres; 
+
 
 ?>
