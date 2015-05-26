@@ -27,8 +27,6 @@ function koalasoft_form_alter(&$form, &$form_state, $form_id ){
   drupal_add_js($path.'/js/scripts.js');
   //LECTURES 
   
-  //vacho
-
   if($form_id == "lectura_node_form"){
     $numcomp = db_query("SELECT max(field_comprobante_lectura_value) FROM field_data_field_comprobante_lectura")->fetchField();
     $fecha = date('Y-m-d', strtotime( '-1 month' , strtotime( date('Y-m-d') ) ));
@@ -276,7 +274,7 @@ function payments_form($form, &$form_state) {
       $lecturas = EntitiesData::getDatas(
           'node',
           'lectura', 
-          "medidor(direccion) comprobante_lectura lectura_anterior lectura_actual monto fecha_lectura fecha_emision_boleta tarifa fecha_pago monto_pagado comprobante_pago mes", 
+          "medidor(direccion) comprobante_lectura lectura_anterior lectura_actual monto monto_excedente fecha_lectura fecha_emision_boleta tarifa fecha_pago monto_pagado comprobante_pago mes", 
           "monto_pagado=0,medidor=$idMedidor,monto>0");
       
       $j = 1;
@@ -307,43 +305,51 @@ function payments_form($form, &$form_state) {
           
 
           $tieneDeudas = TRUE;
-//layo          $mes = date("n",strtotime($lectura['fecha_lectura']));
           $mes = date("n",strtotime($lectura['fecha_lectura']));
-
           $meshabil = date("n",strtotime($lectura['mes']));
-//layo          $month = getLiteralMonth($mes);
           $month = getLiteralMonth($meshabil);
           
           if($monthOld != $month){
             $form['month'.$j] = array(
                 '#markup' => "
                     <tr>
-                      <th colspan='4'>" . strtoupper($month) . "</th>
+                      <th colspan='3'>" . strtoupper($month) . "</th>
                     </tr>
                     <tr>
-                      <th width='100px'>Fecha</th>
                       <th>Concepto</th>
                       <th width='120px'>Monto</th>
                       <th width='120px'>Pagado</th>
                     </tr>
                  ",
-                //'#markup' => "<div class='months'><b>" . strtoupper($month) . "</b></div>",
             );
             $monthOld = $month;
           }
           
           //LECTURAS
           $totalLecturas += $lectura['monto'];
-          $form['lecture'.$j] = array(
+          $monto = $lectura['monto'];
+          $excedente = $lectura['monto_excedente'];
+          $resLect = $monto - $excedente;
+          $form['lectureM'.$j] = array(
               '#markup' => "
                   <tr>
-                     <td>" . date("d/m/Y",strtotime($lectura['mes'])) ."</td>
-                     <td>Consumo de agua</td>
-                     <td align='right'>" . $lectura['monto'] . "</td>
+                     <td>Tarifa básica por consumo de agua</td>
+                     <td align='right'>" . $resLect . "</td>
                      <td align='right'>" . $lectura['monto_pagado'] . "</td>
                   </tr>
                ",
           );
+          
+          $form['lectureE'.$j] = array(
+            '#markup' => "
+                  <tr>
+                     <td>Excedente por consumo de agua</td>
+                     <td align='right'>" . $excedente . "</td>
+                     <td align='right'>" . $lectura['monto_pagado'] . "</td>
+                  </tr>
+               ",
+          );
+          
           
           $k=1;
           //CARGOS MENSUALES
@@ -355,7 +361,6 @@ function payments_form($form, &$form_state) {
               $form['pago_mensual' . $i . $k] = array(
                 '#markup' => "
                   <tr>
-                     <td>" . date("d/m/Y",strtotime($lectura['fecha_lectura'])) ."</td>
                      <td>" . $pago['concepto'] ."</td>
                      <td>" . $pago['monto'] . "</td>
                      <td> 0 </td>
@@ -367,31 +372,35 @@ function payments_form($form, &$form_state) {
 
           
           //MULTA POR INCUMPLIMIENTO
-          $mesActual = date('n');
-          if($mes < $mesActual){
-            $pagosIncumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto monto periodicidad fecha", "activo=1,monto>0,periodicidad=incumplirPago");
-            $tieneMultasIncumplimiento = FALSE;
-            
-            foreach ($pagosIncumplimiento AS $pago){
-                $totalIncumplimientos += $pago['monto'];
-                $tieneMultasIncumplimiento = TRUE;
-                $form['pago_incumplimiento' . $i . $j] = array(
-                  '#markup' => "
-                    <tr>
-                       <td>" . date("d/m/Y", strtotime($lectura['fecha_lectura'])) ."</td>
-                       <td>" . $pago['concepto'] . " </td>
-                       <td>" . $pago['monto'] . "</td>
-                       <td> 0 </td>
-                    </tr>
-                 ",
-                );
-            }//end multas incumplimiento
-          }
+          $now = time();
+          $time = strtotime(date('Y-m-01 00:00:00'));
+          $iniMonth = date('Y-m-d H:i:s', $time);
+          $iniMonth = strtotime($iniMonth);
+          
+          $pagosIncumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto monto limite_dias periodicidad fecha", "activo=1,monto>0,periodicidad=incumplirPago");
+          $tieneMultasIncumplimiento = FALSE;
+          foreach ($pagosIncumplimiento AS $pago){
+            $term = $iniMonth + intval($pago['limite_dias'])*24*60*60;
+            if($term < $now) {
+              $totalIncumplimientos += $pago['monto'];
+              $tieneMultasIncumplimiento = TRUE;
+              $form['pago_incumplimiento' . $i . $j] = array(
+                '#markup' => "
+                <tr>
+                  <td>" . $pago['concepto'] . " </td>
+                  <td>" . $pago['monto'] . "</td>
+                  <td> 0 </td>
+                </tr>
+              ",
+              );
+            }  
+          }//end multas incumplimiento
+          
           //CARGOS INDIVIDUALES
           $meslectura = date('m',strtotime($lectura['mes'])) + 0;
-
-          $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes']);
-
+          $lastDayMonth = date("Y-m-t", strtotime($lectura['mes']));
+          
+          $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes'].",fecha<=".$lastDayMonth);
           $tieneDeudasIndivuales = FALSE;
           $k=1;
           foreach ($pagosIndividuales AS $pago){
@@ -403,15 +412,12 @@ function payments_form($form, &$form_state) {
               $mesConsidera = $meshabil;   // layo   date("n",strtotime($pago['fecha']));
             }
 
-//            dpm($mesConsidera." ---- ".$mesPlazo);
-
             if(key($pago['medidor']['direccion']) == $medidor && $mesConsidera == $meslectura) {
               $totalIndividuales += $pago['monto'];
               $tieneDeudasIndivuales = TRUE;
               $form['pago' . $i . $k] = array(
                 '#markup' => "
                   <tr>
-                     <td>" . date("d/m/Y",strtotime($pago['fecha'])) ."</td>
                      <td>" . $pago['motivo'] ."</td>
                      <td align='right'>" . $pago['monto'] . "</td>
                      <td align='right'>" . $pago['monto_pagado'] . "</td>
@@ -427,7 +433,6 @@ function payments_form($form, &$form_state) {
         $form['pagar'.$j] = array(
           '#markup' => "
             <tr>
-              <td>&nbsp;</td>
               <td align='right'>Total</td>
               <td>" .$total . "</td>
               <td>&nbsp;</td>
@@ -468,8 +473,7 @@ function payments_form_validate($form, &$form_state) {
   $mando = $form_state['values']['mando'];
   $medidor = $form_state['values']['medidor'];
   $mesDePago = $form_state['values']['mes'];
-    global $user;
-  //dpm($mando."  ".$medidor."  ".$mes);
+  global $user;
   
   if($mando == "pagarLecturas"){
     
@@ -502,114 +506,116 @@ function payments_form_validate($form, &$form_state) {
     }
     
     if(count($lecturas) > 0)
-    foreach ($lecturas AS $lectura){
-//layo        $mes = date("n",strtotime($lectura['fecha_lectura']));
+      foreach ($lecturas AS $lectura){
         $mes = date("n",strtotime($lectura['mes']));
-//layo        if ($mes == $mesDePago) {
-            //LECTURAS
-          $fechaLectura = $lectura['fecha_lectura'];
+        //LECTURAS
+        $fechaLectura = $lectura['fecha_lectura'];
           
-            $node = node_load($lectura['nid']);            
-            $node->field_monto_pagado['und'][0]['value'] = $lectura['monto'];
+        $node = node_load($lectura['nid']);            
+        $node->field_monto_pagado['und'][0]['value'] = $lectura['monto'];
+        $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
+        $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
+        node_save($node);
+            
+        //CARGOS MENSUALES
+        $pagosMensuales = EntitiesData::getDatas('node', 'porpagar', "concepto monto periodicidad fecha", "activo=1,monto>0,periodicidad=Mensual");
+
+        $fecaux= strtotime($lectura['fecha_lectura']);
+        $fecha = date('Y-m-d', mktime(0,0,0, date('n',$fecaux)-1, 1, date('Y',$fecaux)));
+        foreach ($pagosMensuales AS $pago){
+    
+          $node = new stdClass();
+          $node->type = 'multa';
+          node_object_prepare($node);
+          $node->title = "No aplica";
+          $node->language = LANGUAGE_NONE;
+          $node->field_medidor[LANGUAGE_NONE][0]['target_id']   = intval($idMedidor);
+          $node->field_porpagar[LANGUAGE_NONE][0]['target_id']   = $pago['nid'];
+          $node->field_monto['und'][0]['value'] = $pago['monto'];
+          $node->field_motivo['und'][0]['value'] = $pago['concepto'];
+          $node->field_fecha['und'][0]['value'] =       $fecha;//date("d-m-Y", strtotime($pago['fecha']));
+          $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
+          $node->field_monto_pagado['und'][0]['value'] = $pago['monto'];
+          $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
+                
+          node_save($node);         
+        }//end pagos mensuales
+            
+        //MULTA POR INCUMPLIMIENTO
+        $now = time();
+        $time = strtotime(date('Y-m-01 00:00:00'));
+        $iniMonth = date('Y-m-d H:i:s', $time);
+        $iniMonth = strtotime($iniMonth);
+        
+        $pagosIncumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto monto limite_dias periodicidad fecha", "activo=1,monto>0,periodicidad=incumplirPago");
+        $tieneMultasIncumplimiento = FALSE;
+        foreach ($pagosIncumplimiento AS $pago){
+          $term = $iniMonth + intval($pago['limite_dias'])*24*60*60;
+          if($term < $now) {
+            $totalIncumplimientos += $pago['monto'];
+            $tieneMultasIncumplimiento = TRUE;
+            
+            $node = new stdClass();
+            $node->type = 'multa';
+            node_object_prepare($node);
+            $node->title = "No aplica";
+            $node->language = LANGUAGE_NONE;
+            $node->field_medidor[LANGUAGE_NONE][0]['target_id']   = intval($idMedidor);
+            $node->field_porpagar[LANGUAGE_NONE][0]['target_id']   = $pago['nid'];
+            $node->field_monto['und'][0]['value'] = $pago['monto'];
+            $node->field_motivo['und'][0]['value'] = $pago['concepto'];
+            $node->field_fecha['und'][0]['value'] = $lectura['fecha_lectura'];//date("d-m-Y", strtotime($pago['fecha']));
+            $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
+            $node->field_monto_pagado['und'][0]['value'] = $pago['monto'];
+            $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
+            
+            node_save($node);
+          }
+        }//end multas incumplimiento
+        
+        //CARGOS INDIVIDUALES
+        $lastDayMonth = date("Y-m-t", strtotime($lectura['mes']));
+        $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes'].",fecha<=".$lastDayMonth);
+        
+        dpm($pagosIndividuales);
+        foreach ($pagosIndividuales AS $pago){
+          if($pago['plazo'] != NULL){
+            $mesPlazo = date("n",strtotime($pago['plazo']));
+            $mesConsidera = $mesPlazo;
+          }else {
+            $mesConsidera = date("n",strtotime($pago['fecha']));
+          }
+
+          if(key($pago['medidor']['direccion']) == $medidor && $mesConsidera == $mes) {
+
+            $node = node_load($pago['nid']);            
+            $node->field_monto_pagado['und'][0]['value'] =$node->field_monto['und'][0]['value'];
             $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
             $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
             node_save($node);
-            
-            //CARGOS MENSUALES
-            $pagosMensuales = EntitiesData::getDatas('node', 'porpagar', "concepto monto periodicidad fecha", "activo=1,monto>0,periodicidad=Mensual");
-
-            $fecaux= strtotime($lectura['fecha_lectura']);
-            $fecha = date('Y-m-d', mktime(0,0,0, date('n',$fecaux)-1, 1, date('Y',$fecaux)));
-            foreach ($pagosMensuales AS $pago){
-    
-                $node = new stdClass();
-                $node->type = 'multa';
-                node_object_prepare($node);
-                $node->title = "No aplica";
-                $node->language = LANGUAGE_NONE;
-                $node->field_medidor[LANGUAGE_NONE][0]['target_id']   = intval($idMedidor);
-                $node->field_porpagar[LANGUAGE_NONE][0]['target_id']   = $pago['nid'];
-                $node->field_monto['und'][0]['value'] = $pago['monto'];
-                $node->field_motivo['und'][0]['value'] = $pago['concepto'];
-                $node->field_fecha['und'][0]['value'] =       $fecha;//date("d-m-Y", strtotime($pago['fecha']));
-                $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
-                $node->field_monto_pagado['und'][0]['value'] = $pago['monto'];
-                $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
-                
-                node_save($node);         
-            }//end pagos mensuales
-            
-            //MULTA POR INCUMPLIMIENTO
-            $mesActual = date('n');
-            if($mes < $mesActual){
-                $pagosIncumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto monto periodicidad fecha", "activo=1,monto>0,periodicidad=incumplirPago");
-                foreach ($pagosIncumplimiento AS $pago){
-                    $node = new stdClass();
-                    $node->type = 'multa';
-                    node_object_prepare($node);
-                    $node->title = "No aplica";
-                    $node->language = LANGUAGE_NONE;
-                    $node->field_medidor[LANGUAGE_NONE][0]['target_id']   = intval($idMedidor);
-                    $node->field_porpagar[LANGUAGE_NONE][0]['target_id']   = $pago['nid'];
-                    $node->field_monto['und'][0]['value'] = $pago['monto'];
-                    $node->field_motivo['und'][0]['value'] = $pago['concepto'];
-                    $node->field_fecha['und'][0]['value'] = $lectura['fecha_lectura'];//date("d-m-Y", strtotime($pago['fecha']));
-                    $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
-                    $node->field_monto_pagado['und'][0]['value'] = $pago['monto'];
-                    $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
-                    
-                    node_save($node);
-        
-                }//end multas incumplimiento
-            }
-    
-            //CARGOS INDIVIDUALES
-
-// MODIFICAR ESTA LINEA
-            $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,");
-
-            foreach ($pagosIndividuales AS $pago){
-                if($pago['plazo'] != NULL){
-                    $mesPlazo = date("n",strtotime($pago['plazo']));
-                    $mesConsidera = $mesPlazo;
-                }else {
-                    $mesConsidera = date("n",strtotime($pago['fecha']));
-                }
-                //dpm(key($pago['medidor']['direccion']) ."==". $medidor);
-
-                if(key($pago['medidor']['direccion']) == $medidor && $mesConsidera == $mes) {
-
-                    $node = node_load($pago['nid']);            
-                    $node->field_monto_pagado['und'][0]['value'] =$node->field_monto['und'][0]['value'];
-                    $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
-                    $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
-                    node_save($node);
-/*                    $node->type = 'multa';
-                    node_object_prepare($node);
-                    $node->title = "No aplica";
-                    $node->language = LANGUAGE_NONE;
-                    $node->field_medidor[LANGUAGE_NONE][0]['target_id']   = intval($idMedidor);
-                    $node->field_porpagar[LANGUAGE_NONE][0]['target_id']   = $pago['nid'];
-                    $node->field_monto['und'][0]['value'] = $pago['monto'];
-                    $node->field_motivo['und'][0]['value'] = $pago['concepto'];
-                    $node->field_fecha['und'][0]['value'] = $lectura['fecha_lectura'];
-                    $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
-                    $node->field_monto_pagado['und'][0]['value'] = $pago['monto'];
-                    $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
-  
-*/
-                }
-            }//end pagos individuales
-            
-//layo        }
+            /*
+            $node->type = 'multa';
+            node_object_prepare($node);
+            $node->title = "No aplica";
+            $node->language = LANGUAGE_NONE;
+            $node->field_medidor[LANGUAGE_NONE][0]['target_id']   = intval($idMedidor);
+            $node->field_porpagar[LANGUAGE_NONE][0]['target_id']   = $pago['nid'];
+            $node->field_monto['und'][0]['value'] = $pago['monto'];
+            $node->field_motivo['und'][0]['value'] = $pago['concepto'];
+            $node->field_fecha['und'][0]['value'] = $lectura['fecha_lectura'];
+            $node->field_fecha_pago['und'][0]['value'] = date("Y-n-d");
+            $node->field_monto_pagado['und'][0]['value'] = $pago['monto'];
+            $node->field_comprobante_pago['und'][0]['value'] = $comprobantePago;
+            node_save($node);
+            */
+          }
+        }//end pagos individuales
       }//end lecturas
-    
+       
     drupal_set_message("Se registro el pago exitosamente");
-//LAYO    $paramFecha = substr( $fechaLectura , 0, 10);
     $paramFecha = substr( $lectura['mes'] , 0, 10);
     header("Location: http://" . $_SERVER['SERVER_NAME'] . "/" . "comprobante-de-pago?me=" . $medidor. "&mo=" . $paramFecha);
-    return $form_state; 
-         
+    return $form_state;          
   }
   
   // Pagar pagos
