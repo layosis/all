@@ -775,26 +775,22 @@ function getPageComprobante($idcomp=0){
   $total = 0;
     $trs = "";
   foreach($multas as $row){
-
-
-
     $total =  $total + $row->monto;
       $trs .=  "<tr>
                 <td class='datos'>" . $row->motivo . "</td><td class='monto'>". $row->monto ." Bs.</td>
                 </tr>";
-    //~ $pos = strpos($row->motivo, 'reunión');
-    //~ if($pos > 0 ){
-        //~ if($row->monto == 10 )
-          //~ $falta += $row->monto;
-        //~ else
-          //~ $retraso += $row->monto;
-    //~ } else {
-          //~ $otros += $row->monto;
-    //~ }
   }
   if(!$idlectura)
     $idlectura = 0;
   $lectura = node_load($idlectura);
+
+  $fec_lectura = $lectura->field_fecha_lectura['und'][0]['value'];
+
+  $incumplimiento = EntitiesData::getDatas('node', 'porpagar', "limite_dias", "activo=1,monto>0,periodicidad=incumplirPago"); 
+  $dias = $incumplimiento[0]['limite_dias'];
+  $olddate =  strtotime($fec_lectura);
+
+  $newdate = date('d/m/Y', mktime(0, 0, 0, date('m', $olddate), (date('d', $olddate) + $dias), date('Y', $olddate)));
 
 
   $nombreCliente = "<div class='nombre'>Apellidos y Nombres de Socios : <span>" . $nombres . "</span></div>";
@@ -805,7 +801,21 @@ function getPageComprobante($idcomp=0){
   $monto_lectura = $lectura->field_monto['und'][0]['value'];
   $monto_lectura_excedente = $lectura->field_monto_excedente['und'][0]['value'];
 
+
+
   $total += $monto_lectura;
+
+  $lecturaAnterior = $lectura->field_lectura_anterior['und'][0]['value'];
+  $lecturaActual = $lectura->field_lectura_actual['und'][0]['value'];
+  $consumo = $lecturaActual - $lecturaAnterior;
+
+
+  $datos_consumo = "<div class='consumo'>";
+  $datos_consumo .= "<div id='lec-anterior'>Lectura Anterior: <span>".$lecturaAnterior." m3</span></div>";
+  $datos_consumo .= "<div id='lec-anterior'>Lectura Actual: <span>".$lecturaActual." m3</span></div>";
+  $datos_consumo .= "<div id='lec-anterior'>Consumo: <span>".$consumo." m3</span></div>";
+  $datos_consumo .= "</div>";
+
 
   $tabla = "<div id='tablacomprobante'>
       <table>
@@ -819,24 +829,12 @@ function getPageComprobante($idcomp=0){
 
         ";
   $tabla .= $trs;
-        //~ <tr>
-          //~ <td class='datos'>Recargo por incumplimiento.</td><td class='monto'>0</td>
-        //~ </tr>
-        //~ <tr>
-          //~ <td class='datos'>Multa por inacistencias a Asamblea.</td><td class='monto'>". $falta ."</td>
-        //~ </tr>
-        //~ <tr>
-          //~ <td class='datos'>Multa por Retrasos a Asamblea.</td><td class='monto'>". $retraso ."</td>
-        //~ </tr>
-        //~ <tr>
-          //~ <td class='datos'>Reposición de Formulario.</td><td class='monto'>0</td>
-        //~ </tr>
-        //~ <tr>
-          //~ <td class='datos'>Otros.</td><td class='monto'>". $otros ."</td>
-        //~ </tr>
+
   $tabla .= "<tr class='total'>
           <td class='datos'>TOTAL :</td><td class='monto'>" . $total . " Bs.</td></tr>
           </table></div>";
+
+  $limite = "<div class='limite'>Fecha Limite de Pago :<span class ='valor'>". $newdate .". </span></div>";
 
   $literal = "<div class='literal'><span class = 'texto'>Son: </span><span class ='valor'>".EnLetras::ValorEnLetras($total,'Boliviano').". </span></div>";
 
@@ -846,7 +844,8 @@ function getPageComprobante($idcomp=0){
   $valor = "<div  id='comprobante'>".
         $logo.
         $nombreEmp.$fecha.$comprovante.
-        $titulo.$nombreCliente.$medidor.$mes.$tabla.$literal.
+        $titulo.$nombreCliente.$medidor.$mes.$datos_consumo.
+        $tabla.$literal.$limite.
         $firmas[0].$firmas[1].
         "</div>";
 

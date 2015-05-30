@@ -76,12 +76,53 @@ foreach ($pagosIndividuales AS $rows){
 }
 
 
+$res = db_query("select MONTH(mo.field_mes_value) mes,YEAR(mo.field_mes_value) anio, (lac.field_lectura_actual_value - lan.field_lectura_anterior_value) consumo 
+from field_data_field_medidor m 
+inner join field_data_field_lectura_anterior lan using(entity_id)
+inner join field_data_field_lectura_actual lac using(entity_id)
+inner join field_data_field_mes mo using(entity_id)
+where m.bundle='lectura'
+and m.field_medidor_target_id = :id
+and mo.field_mes_value < :date
+order by mo.field_mes_value desc limit 4", array(':id' => $ids, ':date'=> $mesactual));
 
+$datos ="<div id='historicos'><div class='subtitle'><span>Consumo Historico</span></div>";
+foreach ($res as $rows) {
+   $mesL = "";
+   switch ($rows->mes) {
+      case 1: $mesL = 'Enero'; break;
+      case 2: $mesL = 'Febrero'; break;
+      case 3: $mesL = 'Marzo'; break;
+      case 4: $mesL = 'Abril'; break;
+      case 5: $mesL = 'Mayo'; break;
+      case 6: $mesL = 'Junio'; break;
+      case 7: $mesL = 'Julio'; break;
+      case 8: $mesL = 'Agosto'; break;
+      case 9: $mesL = 'Septiembre'; break;
+      case 10: $mesL = 'Octubre'; break;
+      case 11: $mesL = 'Noviembre'; break;
+      case 12: $mesL = 'Diciembre'; break;
+   }
+
+
+
+   $datos .= "<div class='mes-historico'>
+   <span class='historico-label'>". $mesL . "-".$rows->anio.":</span>    
+   <span class='historico-content'>". $rows->consumo ." m3</span></div>";
+}
+$datos .= "</div>";
+
+
+
+$subtotal = $montodeuda + $porpagar + $pagosInd;
 
 
 
 $numFac = "<div id='deuda'><div class ='numfacturas'>Número de facturas que adeuda : ". $mesesdeuda ."</div>";
-$numFac .= "<div class ='numfacturas'>Importe que adeuda : ". ($montodeuda + $porpagar + $pagosInd) ."</div></div>";
+$numFac .= "<div class ='numfacturas'>Importe que adeuda : ". $subtotal ."</div>";
+$numFac .= "<div class ='numfacturas'>Total deuda : ". ($subtotal + $totalmes) ."</div></div>";
+
+$numFac .= $datos;
 
 print $numFac; 
 ?>

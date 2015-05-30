@@ -38,7 +38,7 @@
   margin-top: 55px;
 }
 
-#comprobante .mes {
+#comprobante .consumo {
   margin-bottom: 30px;
 }
 
@@ -92,6 +92,17 @@
 }
 
 
+.limite {
+  text-align: right;
+  margin-top: -19px;
+}
+
+.consumo > div {
+  float: left;
+  width: 30%;
+  text-align: center;
+}
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #page-title { display: none;}
@@ -111,6 +122,11 @@
   #logotxt{
     margin-top: -24px;
   }
+.limite {
+  text-align: right;
+  margin-top: -80px;
+  margin-bottom: 60px;
+}
   .literal {
     padding: 5px 0 0 15px;
     margin-bottom: 60px;

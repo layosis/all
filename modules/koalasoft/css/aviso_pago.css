@@ -8,6 +8,16 @@
   body{
     font-size: 9px !important;
   }
+
+  table, tr, td{
+    border: 0px !important;
+  }
+  td{
+    border-bottom: 1px solid #dfdfdf !important;
+  }
+
+  td:first-child{padding-right: 20px !important; border-right: 1px solid #dfdfdf !important;}
+  td:last-child{padding-left: 20px !important;}
   #fecha,
   #views-exposed-form-aviso-pago-page{
     display: none;
@@ -92,5 +102,75 @@
   text-align: center;
   margin-left: 270px;
 }
+
+.conceptos {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  border-top: solid 1px #c3c3c3;  
+}
+
+.views-field-field-monto,
+.block-conceptos{
+  width: 90%;
+  margin: 0 auto;
+  clear: both;
+}
+.views-label.views-label-field-monto,
+.block-conceptos .mensuales .views-label,
+.individuales .views-label,
+.total .views-label{
+  width: calc(100% - 50px);
+  width: -webkit-calc(100% - 50px);
+  width: -moz-calc(100% - 50px);
+  float: left;
+  border-bottom: dotted 1px #cacaca;  
+}
+
+.views-field-field-monto .field-content,
+.block-conceptos .mensuales .field-content,
+.individuales .field-content,
+.total .field-content{
+  width: 50px;
+  float: left;
+  text-align: right;
+  border-bottom: dotted 1px #c6c6c6;  
+}
+.total .views-label,
+.total .field-content{
+  font-weight: bold;
+  border-top: 1px solid #c2c2c2;
+  border-bottom: 1px solid #c2c2c2;
+  padding: 4px 0;
+  margin-top: -1px;
+}
+
+.limite-pago {
+  width: 90%;
+  margin: 0 auto;
+  clear: both;
+  padding-top: 10px;
+}
+
+#deuda {
+  width: 160px;
+  margin-top: 10px;
+}
+
+#historicos {
+  width: 105px;
+  float: right;
+  margin-top: -58px;
+}
+.subtitle{
+  text-align: center;
+  font-weight: bold;
+}
+.historico-label {
+  float: left;
+  width: 75px;
+}
+
+
 
 }
