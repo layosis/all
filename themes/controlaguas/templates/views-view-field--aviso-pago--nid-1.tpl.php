@@ -23,6 +23,8 @@
  */
 
 //  dpm($row);
+
+global $totalmes;
  $lectura = node_load($output);
  $medidor = $row->field_field_medidor[0]['raw']['target_id'];
  $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto>0,monto_pagado=0,medidor=$medidor");
@@ -53,12 +55,12 @@ $extras = 0;
    $extras += $pagos['monto']; 
  }
 
-
+$totalmes = $row->field_field_monto[0]['raw']['value'] + $extras;
  $campos .= $txt;
  $campos .="<div class= 'views-field'>";
  $campos .="<spam class = 'views-label'>Total:</spam>";
  $campos .="<div class = 'field-content'>";
- $campos .=   ($row->field_field_monto[0]['raw']['value'] + $extras) . " Bs.";
+ $campos .=   $totalmes . " Bs.";
  $campos .="</div>";
  $campos .="</div>"; 
 print $campos; 

@@ -207,7 +207,6 @@ function payments_form($form, &$form_state) {
           AND m.entity_id = nom.entity_id
           AND n.title = :medidor limit 1)", array(":medidor" => $medidor));
       $med=array();
-      dpm($medidor);
 
             
       foreach($res as $row){
@@ -577,7 +576,6 @@ function payments_form_validate($form, &$form_state) {
         $lastDayMonth = date("Y-m-t", strtotime($lectura['mes']));
         $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes'].",fecha<=".$lastDayMonth);
         
-        dpm($pagosIndividuales);
         foreach ($pagosIndividuales AS $pago){
           if($pago['plazo'] != NULL){
             $mesPlazo = date("n",strtotime($pago['plazo']));
