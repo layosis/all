@@ -27,6 +27,7 @@ function koalasoft_form_alter(&$form, &$form_state, $form_id ){
   drupal_add_js($path.'/js/scripts.js');
   //LECTURES 
   
+
   if($form_id == "lectura_node_form"){
     $numcomp = db_query("SELECT max(field_comprobante_lectura_value) FROM field_data_field_comprobante_lectura")->fetchField();
     $fecha = date('Y-m-d', strtotime( '-1 month' , strtotime( date('Y-m-d') ) ));
@@ -398,8 +399,10 @@ function payments_form($form, &$form_state) {
           //CARGOS INDIVIDUALES
           $meslectura = date('m',strtotime($lectura['mes'])) + 0;
           $lastDayMonth = date("Y-m-t", strtotime($lectura['mes']));
-          
-          $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes'].",fecha<=".$lastDayMonth);
+
+          $mesini = date('Y-m-d', strtotime($lectura['mes']));
+
+          $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes'].",fecha>=$mesini,fecha<=$lastDayMonth");
           $tieneDeudasIndivuales = FALSE;
           $k=1;
           foreach ($pagosIndividuales AS $pago){
@@ -956,9 +959,17 @@ function getLectura($idmedidor, $anio){
   return $ids;
 }
 
-function separarTarifa(){
 
+function koalasoft_views_pre_render(&$view) {
+  // Scramble the order of the rows shown on this result page.
+  // Note that this could be done earlier, but not later in the view execution
+  // process.
+  if($view->name == 'aviso_pago'){
+    drupal_add_css(drupal_get_path('module', 'koalasoft') . '/css/aviso_pago.css');
+  }
+  return $view;
 }
+
 
 /*********************************************
  *   MODIFICACION DEL KARDEX DEL USUARIO

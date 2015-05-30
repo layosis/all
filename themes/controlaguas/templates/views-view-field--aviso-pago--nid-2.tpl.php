@@ -26,25 +26,53 @@ global $totalmes;
 $node = node_load($output);
 $ids = $node->field_medidor['und'][0]['target_id'];
 
-$mesactual = date("Y-m-d", strtotime($node->field_mes['und'][0]['value']));
+$datestr = strtotime($node->field_mes['und'][0]['value']);
+$mesactual = date("Y-m-d", $datestr);
+$mesini = date('Y-m-d',mktime(0, 0, 0, (date("m", $datestr) - 1)  , 1, date("Y", $datestr)));
 
+$multa=0;
+$dias=0;
+$multaEntity = EntitiesData::getDatas('node', 'porpagar', "monto limite_dias", 
+                                          "activo=1,monto>0,periodicidad=incumplirPago,fecha<$mesactual");
+
+foreach ($multaEntity AS $rows){
+   $multa = $rows['monto'];
+   $dias = $rows['limite_dias'];
+}
+
+/*   Meses adeudados
+     --------------- */
 $lecturas = EntitiesData::getDatas(
    'node',
    'lectura', 
-   "monto monto_excedente mes", 
+   "monto monto_excedente fecha_lectura mes", 
    "monto_pagado=0,medidor=$ids,monto>0,mes<$mesactual");
 
-$monto=0;
-$mesesdeuda=1;
+$montodeuda=0;
+$mesesdeuda=0;
 foreach ($lecturas AS $rows){
-   $monto += $rows['monto'];
+   $montodeuda += $rows['monto'];
+   $montodeuda += $multa;
    $mesesdeuda +=1;
 }
 
+/*   Pagos mensuales
+     --------------- */
 $pagosMensuales = EntitiesData::getDatas('node', 'porpagar', "monto fecha", 
                                           "activo=1,monto>0,periodicidad=Mensual,fecha<$mesactual");
+$porpagar = 0;
 foreach ($pagosMensuales AS $rows){
-   $monto += $rows['monto'];
+   $porpagar += $rows['monto'];
+}
+
+$porpagar = $mesesdeuda * $porpagar;
+
+/*   Pagos individuales
+     ------------------ */
+$pagosInd = 0;
+$pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "monto monto_pagado", "monto>0,monto_pagado=0,medidor=$ids,fecha>=$mesini,fecha<$mesactual");
+foreach ($pagosIndividuales AS $rows){
+   $pagosInd += $rows['monto'];
 }
 
 
@@ -52,8 +80,8 @@ foreach ($pagosMensuales AS $rows){
 
 
 
-$numFac = "<div id='deuda'><div class ='numfacturas'>Nummero de facturas que adeuda : ". $mesesdeuda ."</div>";
-$numFac .= "<div class ='numfacturas'>Importe total que adeuda : ". ($totalmes + $monto) ."</div></div>";
+$numFac = "<div id='deuda'><div class ='numfacturas'>Número de facturas que adeuda : ". $mesesdeuda ."</div>";
+$numFac .= "<div class ='numfacturas'>Importe que adeuda : ". ($montodeuda + $porpagar + $pagosInd) ."</div></div>";
 
 print $numFac; 
 ?>

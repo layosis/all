@@ -27,7 +27,9 @@
  * @ingroup views_templates
  */
 
+  dpm($classes);
 ?>
+
 <div class="<?php print $classes; ?>">
   <?php print render($title_prefix); ?>
   <?php if ($title): ?>

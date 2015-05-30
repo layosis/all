@@ -1,0 +1,96 @@
+
+/* =============================================================================
+ *   PRE-AVISO DE PAGO
+ * ========================================================================== */
+
+
+@media print {
+  body{
+    font-size: 9px !important;
+  }
+  #fecha,
+  #views-exposed-form-aviso-pago-page{
+    display: none;
+  }
+  h2.field-content {
+    text-align: center;
+    font-size: 12px;
+  }
+
+  td {
+    vertical-align: top;
+  }
+
+  .views-view-grid td{
+    padding: 5px;
+  }
+  .nro-boleta {
+    width: 70px;
+    float: right;
+    text-align: center;
+    margin-top: -10px;
+    clear: right;
+    font-weight: bold;
+  }
+  .nro-boleta span {
+    float: left;
+  }
+  .views-field span.views-label{
+    font-weight: bold;
+  }
+
+
+.views-field {
+  margin-bottom: 3px;
+}
+
+.views-field-field-mes {
+  width: 100px;
+  float: left;
+}
+.views-label-field-mes,
+.views-label-field-medidor,
+.views-field-field-fecha-lectura,
+.views-field-field-lectura-anterior,
+.views-field-field-lectura-actual{
+  margin-right: 10px;
+}
+
+
+
+.views-field-field-medidor {
+  width: 100px;
+  margin-left: 178px;
+}
+
+.views-field-field-mes  span,
+.views-field-field-medidor span {
+  float: left;
+}
+
+
+.views-field-field-fecha-lectura {
+  width: 73px;
+  text-align: center;
+  float: left;
+}
+
+.views-field-field-lectura-anterior {
+  width: 80px;
+  float: left;
+  text-align: center;
+}
+
+.views-field-field-lectura-actual {
+  width: 70px;
+  text-align: center;
+  float: left;
+}
+
+.consumo {
+  width: 45px;
+  text-align: center;
+  margin-left: 270px;
+}
+
+}

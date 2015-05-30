@@ -27,7 +27,11 @@
 global $totalmes;
  $lectura = node_load($output);
  $medidor = $row->field_field_medidor[0]['raw']['target_id'];
- $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto>0,monto_pagado=0,medidor=$medidor");
+ $mesini = date('Y-m-01',strtotime($lectura->field_mes['und'][0]['value']));
+ $mesfin = date('Y-m-t',strtotime($lectura->field_mes['und'][0]['value']));
+
+ $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto>0,monto_pagado=0,medidor=$medidor,fecha>=$mesini,fecha<=$mesfin");
+
  $pagosMensuales = EntitiesData::getDatas('node', 'porpagar', "concepto monto periodicidad fecha", "activo=1,monto>0,periodicidad=Mensual");
 
 
@@ -38,7 +42,7 @@ $txt="";
 $extras = 0;
 
  foreach ($pagosMensuales AS $mensual){
-   $txt .="<div class= 'views-field'>";
+   $txt .="<div class= 'views-field mensuales'>";
    $txt .="<spam class = 'views-label'>". $mensual['concepto'] ."</spam>";
    $txt .="<div class = 'field-content'>". $mensual['monto'] ." Bs.</div>";
    $txt .="</div>";
@@ -48,7 +52,7 @@ $extras = 0;
 
  foreach ($pagosIndividuales AS $pagos){
 
-   $txt .="<div class= 'views-field'>";
+   $txt .="<div class= 'views-field individuales'>";
    $txt .="<spam class = 'views-label'>". $pagos['motivo'] ."</spam>";
    $txt .="<div class = 'field-content'>". $pagos['monto'] ." Bs.</div>";
    $txt .="</div>";
@@ -57,7 +61,7 @@ $extras = 0;
 
 $totalmes = $row->field_field_monto[0]['raw']['value'] + $extras;
  $campos .= $txt;
- $campos .="<div class= 'views-field'>";
+ $campos .="<div class= 'views-field total'>";
  $campos .="<spam class = 'views-label'>Total:</spam>";
  $campos .="<div class = 'field-content'>";
  $campos .=   $totalmes . " Bs.";
