@@ -64,6 +64,7 @@
                 $node->promote = 0; 
                 $node->comment = 0;
                 $node->field_medidor['und'][0]['target_id'] = $medidor;
+                $node->field_porpagar['und'][0]['target_id'] =  5445;
                 $node->field_monto['und'][0]['value'] = $_SESSION['falta'];
                 $node->field_motivo['und'][0]['value'] = 'Falta a asamblea en fecha: ' . $_POST['fecha'];
                 $node->field_fecha['und'][0]['value'] = date('Y-m-d H:i:s');
