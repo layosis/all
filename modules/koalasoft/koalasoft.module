@@ -920,7 +920,7 @@ function getTable($idMedidor, $anio){
         $monto = $lectura->field_monto['und'][0]['value'];
         $montoExcedente = $lectura->field_monto_excedente['und'][0]['value'];
         if($montoPagado > 0) {
-          $montoBase = $montoExcedente - $montoPagado;
+          $montoBase = abs($montoExcedente - $monto);
           $estilo = "";    
           $total[$j] += $montoBase; 
           
@@ -974,9 +974,10 @@ function getTable($idMedidor, $anio){
   $row .= "<tr class='odd views-row-first'>";
   $row .= "<td class='views-field views-field-php-12'>Incumplimiento pago [Bs]</td>";
   
-  $incumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto monto", "activo=1,monto>0,periodicidad=incumplirPago");
+  $incumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto monto limite_dias", "activo=1,monto>0,periodicidad=incumplirPago");
   $concepto = $incumplimiento[0]['concepto'];
   $montoIncumplimiento = $incumplimiento[0]['monto'];
+  $limiteDias = $incumplimiento[0]['limite_dias'];
   
   for ($j=1; $j<=12; $j++) {
     $idLectura = getLecturaMes($idMedidor, $anio, $j);
@@ -984,27 +985,29 @@ function getTable($idMedidor, $anio){
       //Lectura
       $lectura = node_load($idLectura);
       $mes = date('n', strtotime($lectura->field_mes['und'][0]['value']));
+      $fechaLectura = date('Y-m-d H:i:s Z', strtotime($lectura->field_mes['und'][0]['value']));
   
       if($mes == $j) {
         $montoPagado = $lectura->field_monto_pagado['und'][0]['value'];
         $monto = $lectura->field_monto['und'][0]['value'];
-        $montoExcedente = $lectura->field_monto_excedente['und'][0]['value'];
+        $deadline = date('Y-m-d H:i:s Z', strtotime(date("$anio-$j-$limiteDias 00:00:00")));
         
-        $pagosIncumplimiento = EntitiesData::getDatas('node', 'multa',
-            "porpagar monto motivo fecha plazo fecha_pago monto_pagado comprobante_pagp",
-            "medidor=$idMedidor,motivo=$concepto");
-        $montoPagadoIncumplimiento = $pagosIncumplimiento['monto'];
-        $currentMonth = intval(date("m"));
-        $nDaysToPay = 10;
-        if($montoPagadoIncumplimiento > 0 || ($currentMonth == ($j+1) && date("d") < $nDaysToPay) ) {
+        if($montoPagado > 0){ // ha pagado
+          $fechaPago = $lectura->field_fecha_pago['und'][0]['value'];
           $estilo = "";
+          if ($fechaPago <= $deadline) {
+            $montoIncumplimiento = 0;
+          }
           $total[$j] += $montoIncumplimiento;
           
-        }else {
+        }else { // no ha pagado
           $estilo = "red";
+          if($deadline >= $fechaLectura){
+            $montoIncumplimiento = 0;
+          }
           $totalA[$j] += $montoIncumplimiento;
-          
         }
+        
         $row .= "<td class='views-field views-field-php-12 $estilo'>" . $montoIncumplimiento . "</td>";
       }
     } else {
