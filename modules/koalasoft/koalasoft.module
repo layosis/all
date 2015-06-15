@@ -402,6 +402,7 @@ function payments_form($form, &$form_state) {
 
           $mesini = date('Y-m-d', strtotime($lectura['mes']));
 
+
           $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', "medidor(direccion) monto monto_pagado motivo fecha plazo", "monto_pagado=0,monto>0,fecha>=".$lectura['mes'].",fecha>=$mesini,fecha<=$lastDayMonth");
           $tieneDeudasIndivuales = FALSE;
           $k=1;
@@ -717,13 +718,14 @@ function getPageComprobante($idcomp=0){
   </div>";
   $titulo = "<div class='title_comprobante'><h1>Comprobante de Pago</h1></div>";
   $medidor = $_GET['me'];
+  $idMedidor = db_query("select nid from node where title=:med", array(':med' => $medidor))->fetchField();
 
   $mes1 = $_GET['mo'];
   $m=date('n', strtotime($mes1));
   $y=date('Y', strtotime($mes1));
   $mes2 =  date('Y-m-d',mktime( 0, 0, 0, $m + 1, 0, $y )); 
 
-  $sqlNombres = "SELECT me.entity_id entity, no.field_nombres_value nombres, 
+/*  $sqlNombres = "SELECT me.entity_id entity, no.field_nombres_value nombres, 
             ap.field_apellido_paterno_value appaterno, am.field_apellido_materno_value apmaterno
             FROM node n, 
             field_data_field_medidor me, 
@@ -736,12 +738,26 @@ function getPageComprobante($idcomp=0){
             AND me.entity_id = am.entity_id
             AND n.title = :medidor";
   $res = db_query($sqlNombres, array(':medidor' => $medidor));
-  $nombres = "";
+*/
+  $persona = EntitiesData::getDatas(
+    'node',
+    'persona', 
+    "nombres apellido_paterno apellido_materno nombres", 
+    "medidor=$idMedidor");
+
+  foreach($persona as $row => $datos){
+    $nombres = $datos['apellido_paterno'] . " " . $datos['apellido_materno'] . " " . $datos['nombres'];
+  }
+
+
+
+
+/*  $nombres = "";
   foreach($res as $row){
     $nombres = $row->appaterno . " " . $row->apmaterno . " " . $row->nombres;
   }
-
-  $sqlLectura = "SELECT m.entity_id entity
+*/
+/*  $sqlLectura = "SELECT m.entity_id entity
               FROM field_data_field_medidor m, node n, 
               field_data_field_comprobante_lectura cl,
               field_data_field_mes fl
@@ -751,8 +767,23 @@ function getPageComprobante($idcomp=0){
               AND n.title = :medidor
               AND fl.field_mes_value between :mes1 and :mes2 limit 1";
   $idlectura = db_query($sqlLectura, array(':medidor'=>$medidor, ':mes1'=>$mes1, ':mes2'=>$mes2))->fetchField();
+*/
+  $lecturas = EntitiesData::getDatas(
+    'node',
+    'lectura', 
+    "comprobante_pago lectura_anterior lectura_actual monto monto_excedente mes fecha_pago ", 
+    "medidor=$idMedidor,mes>=$mes1,mes<=mes2,monto_pagado>0");
 
-  $sqlMultas = "SELECT n.nid nid, m.entity_id entity, f.field_fecha_value fecha, mn.field_monto_value monto, 
+  $idlectura = $lecturas[0]['nid'];
+
+  $fecha = "<div class='fecha'>dia - mes - Año<br>".date("d - m - Y", strtotime($lecturas[0]['fecha_pago']))."</div>";
+
+
+  $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', 
+      "fecha_pago monto_pagado motivo medidor(direccion)", 
+      "monto_pagado>0,medidor=$idMedidor");
+
+/*  $sqlMultas = "SELECT n.nid nid, m.entity_id entity, f.field_fecha_value fecha, mn.field_monto_value monto, 
               mp.field_monto_pagado_value monto_pagado, mo.field_motivo_value motivo
               FROM field_data_field_medidor m, node n, 
               field_data_field_fecha f,
@@ -768,19 +799,33 @@ function getPageComprobante($idcomp=0){
               AND m.bundle = 'multa'
               and f.field_fecha_value between :mes1 and :mes2";
 
+
+
+
   $multas = db_query($sqlMultas, array(':medidor'=>$medidor, ':mes1'=>$mes1, ':mes2'=>$mes2));
+*/
   $datos = array();
   $falta = 0;
   $retraso = 0;
   $otros = 0;
   $total = 0;
-    $trs = "";
-  foreach($multas as $row){
+  $trs = "";
+
+  foreach($pagosIndividuales as $row){
+    $total =  $total + $row['monto_pagado'];
+      $trs .=  "<tr>
+                <td class='datos'>" . $row['motivo'] . "</td><td class='monto'>". $row['monto_pagado'] ." Bs.</td>
+                </tr>";
+  }
+
+
+/*  foreach($multas as $row){
     $total =  $total + $row->monto;
       $trs .=  "<tr>
                 <td class='datos'>" . $row->motivo . "</td><td class='monto'>". $row->monto ." Bs.</td>
                 </tr>";
   }
+*/
   if(!$idlectura)
     $idlectura = 0;
   $lectura = node_load($idlectura);
@@ -797,7 +842,7 @@ function getPageComprobante($idcomp=0){
   $nombreCliente = "<div class='nombre'>Apellidos y Nombres de Socios : <span>" . $nombres . "</span></div>";
   $medidor = "<div class='medidor'>Codigo : <span>". $medidor ."</span></div>";
   $mes = "<div class='mes'>Correspondiente al mes de : <span>". getLiteralMonth($m) ."</span></div>";
-  $fecha = "<div class='fecha'>dia - mes - Año<br>".date("d - m - Y")."</div>";
+//  $fecha = "<div class='fecha'>dia - mes - Año<br>".date("d - m - Y")."</div>";
   $comprovante = "<div class='numero'>Nro. ". $lectura->field_comprobante_lectura['und'][0]['value'] ."</div>";
   $monto_lectura = $lectura->field_monto['und'][0]['value'];
   $monto_lectura_excedente = $lectura->field_monto_excedente['und'][0]['value'];
@@ -857,7 +902,9 @@ function getPageComprobante($idcomp=0){
  * @idMedidor = Id medidor
  * @anio = año
  */
-function getTable($idMedidor, $anio){
+function getTable($idMedidor, $anio) {
+
+  $monthStart = 5-1; $yearStart = 2015;
   
   $head = '
   <table class="views-table cols-9">
@@ -879,7 +926,7 @@ function getTable($idMedidor, $anio){
   $total[1] = 0; $total[2] = 0; $total[3] = 0; $total[4] = 0; $total[5] = 0; $total[6] = 0; $total[7] = 0; $total[8] = 0; $total[9] = 0; $total[10] = 0; $total[11] = 0; $total[12] = 0;
   $totalA[1] = 0; $totalA[2] = 0; $totalA[3] = 0; $totalA[4] = 0; $totalA[5] = 0; $totalA[6] = 0; $totalA[7] = 0; $totalA[8] = 0; $totalA[9] = 0; $totalA[10] = 0; $totalA[11] = 0; $totalA[12] = 0;
   
-  //Consqumo de agua
+  //Consumo de agua
   $row .= "<tr class='odd views-row-first'>";
   $row .= "<td class='views-field views-field-php-12'>Consumo [m3]</td>";
   
@@ -949,9 +996,10 @@ function getTable($idMedidor, $anio){
       $mes = date('n', strtotime($lectura->field_mes['und'][0]['value']));
   
       if($mes == $j) {
+        
         $montoPagado = $lectura->field_monto_pagado['und'][0]['value'];
         $monto = $lectura->field_monto['und'][0]['value'];
-        $montoExcedente = $lectura->field_monto_excedente['und'][0]['value'];
+        $montoExcedente = intval($lectura->field_monto_excedente['und'][0]['value']);
         if($montoPagado > 0) {
           $estilo = "";
           $total[$j] += $montoExcedente;
@@ -1023,7 +1071,6 @@ function getTable($idMedidor, $anio){
   foreach ($pagosMensuales AS $pago){
     $row .= "<tr class='odd views-row-first'>";
     $row .= "<td class='views-field views-field-php-12'>" . $pago['concepto']. " [Bs]</td>";
-    
     for ($j=1; $j<=12; $j++) {
       $idLectura = getLecturaMes($idMedidor, $anio, $j);
       if (!empty($idLectura)) {
@@ -1035,6 +1082,10 @@ function getTable($idMedidor, $anio){
           $montoPagado = $lectura->field_monto_pagado['und'][0]['value'];
           $monto = $pago['monto'];
           
+          if($yearStart == $anio && $monthStart == $j) { //Mes y año de inicio uso del sistema
+            $monto = 0;
+          }
+
           if($montoPagado > 0) {
             $estilo = "";
             $total[$j] += $monto;
@@ -1042,6 +1093,7 @@ function getTable($idMedidor, $anio){
             $estilo = "red";
             $totalA[$j] += $monto;
           }
+
           $row .= "<td class='views-field views-field-php-12 $estilo'>" . $monto . "</td>";
         }
       } else {
@@ -1054,7 +1106,6 @@ function getTable($idMedidor, $anio){
   // Individuales
   $pagosIndividuales = EntitiesData::getDatas('node', 'porpagar', 
       "concepto monto periodicidad fecha porpagar", "activo=1,monto>0,periodicidad=Fijo");
-  //dpm($pagosIndividuales);
   foreach ($pagosIndividuales AS $pago){
     $idPago = $pago['nid'];
     $row .= "<tr class='odd views-row-first'>";

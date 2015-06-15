@@ -19,7 +19,59 @@
  * @ingroup views_templates
  */
  $total=0;
+ $fi = isset($_GET['field_fecha_pago_value']['min']['date']) ? str_replace('/', '-', $_GET['field_fecha_pago_value']['min']['date']) : date('d-m-Y');
+ $ff = isset($_GET['field_fecha_pago_value']['max']['date']) ? str_replace('/', '-', $_GET['field_fecha_pago_value']['max']['date']) : date('d-m-Y');
+ $fi = date('Y-m-d', strtotime($fi));
+ $ff = date('Y-m-d', strtotime($ff));
+
+  $lecturas = EntitiesData::getDatas(
+    'node',
+    'lectura', 
+    "medidor(direccion) monto monto_excedente fecha_pago monto_pagado", 
+    "monto_pagado>0");
+
+  dpm($lecturas);
+
+  $Incumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto", "activo=1,monto>0,periodicidad=incumplirPago")[0]['concepto'];
+
+  $filas = array();
+  foreach ($lecturas as $key => $row) {
+    $fecha = $row['fecha_pago'];
+    $idmedidor = $row['medidor']['nid'];
+    $filas[]=array(
+      'date' => $fecha,
+      'medidor' => key($row['medidor']['direccion']),
+      'monto' => $row['monto_pagado'] - $row['monto_excedente'],
+      'detalle' => 'Tarifa basica por consumo de agua',
+    );
+    $filas[]=array(
+      'date' => $fecha,
+      'medidor' => key($row['medidor']['direccion']),
+      'monto' => $row['monto_excedente'],
+      'detalle' => 'Excedente por consumo de agua',
+    );
+    $pagosIndividuales=array();
+
+    $pagosIndividuales =  EntitiesData::getDatas('node', 'multa', 
+          "fecha_pago monto_pagado motivo", 
+          "monto_pagado>0,fecha_pago=$fecha,medidor=$idmedidor");
+
+    foreach ($pagosIndividuales as $pa_indiv => $pa_row) {
+      $filas[]=array(
+        'date' => $pa_row['fecha_pago'],
+        'medidor' => key($row['medidor']['direccion']),
+        'monto' => $pa_row['monto_pagado'],
+        'detalle' => $pa_row['motivo'],
+      );
+    }
+  }
+
+  foreach ($rows as $row_count => $row) {
+//   dpm($row_count);
+  }
+
 ?>
+
 <table <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
    <?php if (!empty($title) || !empty($caption)) : ?>
      <caption><?php print $caption . $title; ?></caption>
@@ -36,32 +88,36 @@
     </thead>
   <?php endif; ?>
   <tbody>
-    <?php foreach ($rows as $row_count => $row): ?>
-      <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
-        <?php $i=0; foreach ($row as $field => $content): ?>
-          <td <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
-            <?php print $content;
-            //~ $med = $row['field_medidor']; 
-			if($i == 2)  
-			   $total += $content;
-			$i++;
-			?>
+
+    <?php
+      $total=0;  
+      foreach ($filas as $rowsTables => $datos) { 
+        $total += $datos['monto'];
+        $class = ($rowsTables % 2 == 0 ? 'odd' : 'even');
+      ?>
+      <tr <?php print 'class="' . $class .'"'; ?>>
+          <td><?php print date('d-m-Y', strtotime($datos['date'])); ?></td>
+          <td class='views-field views-field-field-medidor'>
+          <?php print $datos['medidor']; ?>
           </td>
-        <?php endforeach;?>
+          <td class='views-field views-field-field-monto-pagado'>
+          <?php print $datos['monto']; ?>
+          </td>
+          <td class='views-field views-field-field-motivo'><?php print $datos['detalle']; ?>
+          </td>
       </tr>
-    <?php endforeach; ?>
 
+    <?php } ?>
 
       <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
-          <td <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
-          </td>
-          <td <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
+          <td></td>
+          <td class='views-field views-field-field-medidor'>
           <b>TOTAL :</b>
           </td>
-          <td <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
+          <td class='views-field views-field-field-monto-pagado'>
           <b><?php print $total; ?></b>
           </td>
-          <td <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
+          <td class='views-field views-field-field-motivo'>
           </td>
       </tr>
 
