@@ -29,9 +29,7 @@
     'lectura', 
     "medidor(direccion) monto monto_excedente fecha_pago monto_pagado", 
     "monto_pagado>0");
-
-  dpm($lecturas);
-
+  
   $Incumplimiento = EntitiesData::getDatas('node', 'porpagar', "concepto", "activo=1,monto>0,periodicidad=incumplirPago")[0]['concepto'];
 
   $filas = array();
